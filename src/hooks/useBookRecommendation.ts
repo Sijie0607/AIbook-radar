@@ -3,8 +3,8 @@ import {
   clearRecommendationDraft,
   getRecommendationDraft,
   getRecommendationRecords,
+  insertRecommendation,
   saveRecommendationDraft,
-  saveRecommendationRecord,
 } from "../services/recommendationsService";
 import type {
   BookRecommendationDraft,
@@ -116,19 +116,32 @@ export function useBookRecommendation() {
 
     try {
       await delay(220);
-      const nextRecords = saveRecommendationRecord(record);
+      const saved = insertRecommendation({
+        id: record.id,
+        title: record.title,
+        author: record.author,
+        domain: record.domain,
+        personalScore: record.personalScore,
+        reason: record.reason,
+        submittedAt: record.submittedAt,
+      });
       clearRecommendationDraft();
-      setRecords(nextRecords);
+      setRecords(getRecommendationRecords());
       setDraft(createEmptyRecommendationDraft());
-      setLatestSubmittedId(record.id);
+      setLatestSubmittedId(saved.id);
       setShowValidation(false);
       setValidationErrors({});
       setSubmitState("success");
       setIsDrawerOpen(false);
       setIsRecordsModalOpen(true);
-    } catch {
+    } catch (error) {
       setSubmitState("error");
-      setSubmitError("推荐暂未保存，请稍后重试");
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("UNIQUE constraint failed")) {
+        setSubmitError("你已经推荐过这本书，本次无需重复提交");
+      } else {
+        setSubmitError("推荐暂未写入虚拟表 book_recommendations，请稍后重试");
+      }
     }
   }
 

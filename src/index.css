@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    background: #f7f8f6;
+    background: #faf8f2;
   }
 
   body {
@@ -12,11 +12,47 @@
     margin: 0;
     color: #18212f;
     letter-spacing: 0;
+    background: #faf8f2;
   }
 
   button,
   input,
   textarea {
     font: inherit;
+  }
+}
+
+@layer utilities {
+  @keyframes pulse-core-green {
+    0%,
+    100% {
+      transform: scale(0.88);
+      opacity: 0.45;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes pulse-select-ring {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(0.96);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.04);
+    }
+  }
+
+  .animate-pulse-core-green {
+    animation: pulse-core-green 9s ease-in-out infinite;
+  }
+
+  .animate-pulse-select-ring {
+    animation: pulse-select-ring 2.4s ease-in-out infinite;
+    transform-origin: center;
   }
 }

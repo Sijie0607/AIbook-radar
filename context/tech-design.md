@@ -51,6 +51,7 @@ index.html → src/main.tsx → src/pages/HomePage.tsx → radar/ui 组件 + ser
 
 - 在 `HomePage` 接线顶部「推荐一本书」与底部「进入推荐」入口；
 - 推荐状态与雷达筛选 / Hover / 选中状态隔离；
+- 提交数据写入虚拟表 `book_recommendations`（schema：`src/mocks/sql/recommendations.schema.sql`），运行时由 `recommendationsService.insertRecommendation` 模拟持久化；
 - 不把推荐表单或业务逻辑写进 `index.html`；
 - 不改正式雷达 `BookItem` 与 `books.mock.json`。
 
@@ -64,9 +65,11 @@ index.html → src/main.tsx → src/pages/HomePage.tsx → radar/ui 组件 + ser
 | `src/components/radar/` | 雷达图首页相关业务组件 |
 | `src/components/recommendation/` | 书籍推荐抽屉、表单、记录弹窗等业务组件（规划落点） |
 | `src/components/ui/` | 通用基础 UI 组件 |
-| `src/services/` | mock service 与未来 API 抽象 |
+| `src/services/` | mock service 与未来 API 抽象；推荐提交按虚拟 SQL 表模拟 INSERT/SELECT |
+| `src/services/virtualDb/` | 虚拟表列类型与 UI 模型映射 |
 | `src/types/` | 业务实体、筛选器、视图状态等 TypeScript 类型 |
 | `src/mocks/` | 首版本地 mock 数据 |
+| `src/mocks/sql/` | 虚拟 SQL schema（如推荐表 `recommendations.schema.sql`） |
 
 组件实现应保持边界清晰，避免把雷达图、筛选器、详情面板、图例写成单一巨型组件。
 
@@ -105,7 +108,7 @@ TypeScript 使用 `strict` 模式，禁止在业务代码中滥用 `any`。新�
 |---|---|
 | `HomePage` | 管理数据加载、筛选、hover、选中、加载、空态、错误态 |
 | `RadarCanvas` | 展示同心圆、八大领域标签、书籍点位与点位交互 |
-| `RadarFilters` | 处理关键词、领域、难度、推荐指数筛选与清空 |
+| `RadarFilters` | 处理关键词搜索，以及书籍类型（领域）、学习难度、推荐指数三组分区筛选与清空 |
 | `RadarTooltip` | 展示 Hover 时的短信息 |
 | `BookDetailPanel` | 展示 Click 后的书籍详情信息 |
 | `RadarLegend` | 解释点、方向、圈层和领域颜色 |

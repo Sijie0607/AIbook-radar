@@ -48,31 +48,33 @@ export function RecommendationDrawer({
         aria-modal="true"
         aria-labelledby="recommendation-drawer-title"
       >
-        <header className="flex items-start justify-between gap-4 border-b border-subtle px-5 py-4">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-subtle px-5 py-4">
           <div>
             <h2 id="recommendation-drawer-title" className="m-0 text-lg font-extrabold text-ink">
               推荐一本 AI 书籍
             </h2>
             <p className="mt-1.5 text-sm leading-6 text-muted">
-              你的推荐会被记录，但不会立即进入正式雷达
+              提交后写入虚拟表 book_recommendations，不会立即进入正式雷达
             </p>
           </div>
           <Button type="button" variant="ghost" onClick={onClose} aria-label="关闭推荐抽屉">
             关闭
           </Button>
         </header>
-        <RecommendationForm
-          draft={draft}
-          domains={domains}
-          errors={errors}
-          submitError={submitError}
-          submitting={submitting}
-          canSubmit={canSubmit}
-          onChange={onChange}
-          onClear={onClear}
-          onCancel={onClose}
-          onSubmit={onSubmit}
-        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <RecommendationForm
+            draft={draft}
+            domains={domains}
+            errors={errors}
+            submitError={submitError}
+            submitting={submitting}
+            canSubmit={canSubmit}
+            onChange={onChange}
+            onClear={onClear}
+            onCancel={onClose}
+            onSubmit={onSubmit}
+          />
+        </div>
       </aside>
     </div>
   );

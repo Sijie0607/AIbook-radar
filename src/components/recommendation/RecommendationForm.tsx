@@ -33,13 +33,13 @@ export function RecommendationForm({
 
   return (
     <form
-      className="flex h-full flex-col"
+      className="flex min-h-0 flex-1 flex-col"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
     >
-      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
         {submitError ? (
           <div className="rounded-panel border border-[#f0c7c0] bg-[#fff7f5] px-3 py-2.5 text-sm text-[#9b3b2e]">
             {submitError}
@@ -119,24 +119,28 @@ export function RecommendationForm({
         </Field>
       </div>
 
-      <div className="flex items-center justify-between gap-2 border-t border-subtle px-5 py-4">
-        <Button type="button" variant="ghost" disabled={submitting} onClick={onClear}>
-          清空表单
-        </Button>
-        <div className="flex items-center gap-2">
+      <footer className="shrink-0 border-t border-subtle bg-white px-5 py-4 shadow-[0_-8px_24px_rgba(24,33,47,0.06)]">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <Button type="button" variant="ghost" disabled={submitting} onClick={onClear}>
+            清空表单
+          </Button>
           <Button type="button" disabled={submitting} onClick={onCancel}>
             取消
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={submitting}
-            className={!canSubmit && !submitting ? "opacity-70" : ""}
-          >
-            {submitting ? "提交中…" : "提交推荐"}
-          </Button>
         </div>
-      </div>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={submitting}
+          className={`w-full min-h-11 text-base ${!canSubmit && !submitting ? "opacity-80" : ""}`}
+          aria-label="提交推荐"
+        >
+          {submitting ? "提交中…" : "提交推荐"}
+        </Button>
+        {!canSubmit && !submitting ? (
+          <p className="mt-2 text-center text-xs text-muted">请先补全书名、作者、领域、个人推荐指数与 30-300 字理由</p>
+        ) : null}
+      </footer>
     </form>
   );
 }

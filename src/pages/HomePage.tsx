@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { BookDetailPanel } from "../components/radar/BookDetailPanel";
+import { BookList } from "../components/radar/BookList";
 import { RadarCanvas } from "../components/radar/RadarCanvas";
 import { RadarFilters } from "../components/radar/RadarFilters";
 import { RadarLegend } from "../components/radar/RadarLegend";
@@ -8,22 +9,13 @@ import { RecommendationDrawer } from "../components/recommendation/Recommendatio
 import { RecommendationRecordsModal } from "../components/recommendation/RecommendationRecordsModal";
 import { Button } from "../components/ui/Button";
 import { Skeleton } from "../components/ui/Skeleton";
+import { DOMAIN_METAS } from "../constants/domains";
 import { useBookRecommendation } from "../hooks/useBookRecommendation";
 import { getRadarBooks } from "../services/booksService";
 import type { BookItem, DifficultyLevel, RadarDomain } from "../types/book";
-import type { DomainMeta, RadarFilterState, RadarViewState, TooltipPosition } from "../types/radar";
+import type { RadarFilterState, RadarViewState, TooltipPosition } from "../types/radar";
 
-const domains: DomainMeta[] = [
-  { name: "AI 工程", color: "#176B87" },
-  { name: "产品方法论", color: "#6A7FDB" },
-  { name: "Agent 设计", color: "#2F9F8F" },
-  { name: "组织变革", color: "#A06A4F" },
-  { name: "数据智能", color: "#3F7D58" },
-  { name: "商业落地", color: "#B7791F" },
-  { name: "伦理治理", color: "#7A5C8E" },
-  { name: "前沿趋势", color: "#4D8DB7" },
-];
-
+const domains = DOMAIN_METAS;
 const domainNames: RadarDomain[] = domains.map((domain) => domain.name);
 const difficulties: DifficultyLevel[] = ["入门认知", "方法实践", "深度进阶"];
 
@@ -106,6 +98,14 @@ export function HomePage() {
     setTooltipPosition(null);
   }
 
+  function handleSelectBook(book: BookItem) {
+    setSelectedBookId(book.id);
+    window.requestAnimationFrame(() => {
+      const card = document.querySelector<HTMLElement>(`[data-book-id="${book.id}"]`);
+      card?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
+
   return (
     <main className="mx-auto w-[min(1440px,calc(100vw-56px))] px-0 py-6">
       <header className="flex items-center justify-between gap-8 pb-5 pt-3.5">
@@ -144,7 +144,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-panel border border-line bg-white shadow-editorial">
+      <section className="overflow-hidden rounded-panel border border-line bg-white/90 shadow-editorial">
         <RadarFilters
           domains={domains}
           difficulties={difficulties}
@@ -152,8 +152,8 @@ export function HomePage() {
           onClear={clearFilters}
           onFiltersChange={setFilters}
         />
-        <div className="grid min-h-[710px] grid-cols-[1fr_340px]">
-          <div className="relative border-r border-subtle bg-[#fbfcfb] bg-[linear-gradient(90deg,rgba(23,107,135,0.04),transparent_28%)] p-[18px] pb-5">
+        <div className="grid min-h-[710px] grid-cols-[1fr_360px]">
+          <div className="relative border-r border-subtle bg-[#faf8f2] p-[18px] pb-5">
             <div className="mb-2.5 flex items-center justify-between gap-4">
               <div>
                 <p className="m-0 text-[15px] font-extrabold">AI 学习路径雷达</p>
@@ -173,12 +173,12 @@ export function HomePage() {
                 onClearSelection={() => setSelectedBookId(null)}
                 onHover={handleHover}
                 onLeave={handleLeave}
-                onSelect={(book) => setSelectedBookId(book.id)}
+                onSelect={handleSelectBook}
               />
               <RadarTooltip book={hoveredBook} position={tooltipPosition} />
               {effectiveViewState === "loading" ? <Skeleton /> : null}
               {effectiveViewState === "empty" ? (
-                <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#cfd7e2] bg-white/90">
+                <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#d8d2c4] bg-[#faf8f2]/90">
                   <div className="max-w-[420px] text-center">
                     <h3 className="mb-2 text-lg font-extrabold">当前条件下暂无书籍</h3>
                     <p className="mb-4 text-sm leading-6 text-muted">
@@ -191,7 +191,7 @@ export function HomePage() {
                 </div>
               ) : null}
               {effectiveViewState === "error" ? (
-                <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#cfd7e2] bg-white/90">
+                <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#d8d2c4] bg-[#faf8f2]/90">
                   <div className="max-w-[420px] text-center">
                     <h3 className="mb-2 text-lg font-extrabold">数据暂不可用</h3>
                     <p className="mb-4 text-sm leading-6 text-muted">
@@ -205,8 +205,9 @@ export function HomePage() {
               ) : null}
             </div>
           </div>
-          <aside className="flex flex-col bg-white" aria-label="雷达说明与书籍详情">
+          <aside className="flex max-h-[760px] flex-col bg-white" aria-label="雷达说明与书籍详情">
             <RadarLegend domains={domains} />
+            <BookList books={filteredBooks} selectedBookId={selectedBookId} onSelect={handleSelectBook} />
             <BookDetailPanel book={selectedBook} />
           </aside>
         </div>

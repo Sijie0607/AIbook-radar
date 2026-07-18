@@ -41,7 +41,8 @@ export function RecommendationRecordsModal({
             推荐已记录
           </h2>
           <p className="mt-1.5 text-sm leading-6 text-muted">
-            这条推荐不会立即进入正式雷达，后续会作为候选记录处理。
+            这条推荐已写入虚拟表 <code className="rounded bg-[#f3f1ea] px-1.5 py-0.5 text-[12px]">book_recommendations</code>
+            ，不会立即进入正式雷达，后续会作为候选记录处理。
           </p>
         </header>
 

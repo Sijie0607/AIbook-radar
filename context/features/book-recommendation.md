@@ -429,7 +429,7 @@ AI-Native 读书雷达当前帮助 AI 学习者和转型从业者发现具有长
 |---|---|
 | 接入层 | `src/pages/HomePage.tsx`：接线顶部「推荐一本书」与底部「进入推荐」，管理推荐抽屉 / 记录弹窗状态 |
 | 业务组件 | `src/components/recommendation/`：`RecommendationDrawer`、`RecommendationForm`、`RecommendationRecordsModal`、`RecommendationRecordCard`、`ScoreInput` |
-| 数据访问 | `src/services/recommendationsService.ts`：记录与草稿读写，UI 不直接访问 `localStorage` |
+| 数据访问 | `src/services/recommendationsService.ts`：按虚拟 SQL 表 `book_recommendations` / `book_recommendation_drafts` 模拟 INSERT/SELECT；运行时落在 localStorage，schema 见 `src/mocks/sql/recommendations.schema.sql` |
 | 类型 | `src/types/` 下独立推荐模型，不复用正式雷达 `BookItem` |
 
 明确不落点：
@@ -450,7 +450,27 @@ AI-Native 读书雷达当前帮助 AI 学习者和转型从业者发现具有长
 | 推荐记录弹窗 | 展示全部推荐记录 | 当前没有推荐记录数据结构 | 需要新增独立推荐记录模型，不复用正式雷达 `BookItem` |
 | 重复推荐 | 个人重复书籍不允许提交 | 当前没有个人记录概念 | 需要新增去重规则，默认按书名 + 作者 |
 
-建议本轮技术草案采用：前端本地持久化作为无后端阶段的过渡，接口形态保留 service 层，未来替换为后端数据库。
+建议本轮技术草案采用：前端以**虚拟 SQL schema** 约定表结构，再由 service 模拟 INSERT/SELECT；运行时用浏览器 localStorage 持久化作为无后端过渡。未来接真实数据库时按同一 schema 建表并替换 service 实现。
+
+### 14.1.1 提交数据落点（虚拟 SQL）
+
+| 内容 | 落点 |
+|---|---|
+| 表结构定义 | [`src/mocks/sql/recommendations.schema.sql`](../../src/mocks/sql/recommendations.schema.sql) |
+| 已提交推荐 | 虚拟表 `book_recommendations`（localStorage 键 `ai-reading-radar:db.book_recommendations`） |
+| 未提交草稿 | 虚拟表 `book_recommendation_drafts`（localStorage 键 `ai-reading-radar:db.book_recommendation_drafts`） |
+| 正式雷达书籍 | **不写入**；仍只读 `books.mock.json` / `booksService` |
+| 列映射类型 | `src/services/virtualDb/recommendationTables.ts` |
+
+提交动作对应：
+
+```sql
+INSERT INTO book_recommendations (
+  id, title, author, domain, personal_score, reason, status, submitted_at, title_author_key
+) VALUES (...);
+```
+
+当前由 `insertRecommendation()` 执行等价写入。
 
 ### 14.2 数据模型与状态说明
 

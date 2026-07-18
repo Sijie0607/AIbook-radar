@@ -17,7 +17,7 @@ AI-Native 读书雷达是一个面向 AI 学习者的长期价值型书单与学
 - 支持关键词、领域、难度、推荐指数筛选；
 - 支持加载态、空结果态和错误态基础模型；
 - 支持从首页发起书籍推荐：右侧抽屉表单、校验提交、推荐记录弹窗；
-- 推荐记录与草稿通过本地存储刷新后可恢复，且不进入正式雷达；
+- 推荐记录写入虚拟 SQL 表 `book_recommendations`（schema：`src/mocks/sql/recommendations.schema.sql`），运行时由 localStorage 模拟持久化，刷新可恢复且不进入正式雷达；
 - 保留“查看完整书单”“评分说明”入口。
 
 当前版本不是完整产品系统。完整书单和评分说明仍是入口，不是已实现页面。
@@ -78,8 +78,15 @@ npm run build
 │   │   └── ui/
 │   ├── hooks/                # 推荐流程等页面状态 hook
 │   ├── mocks/
+│   │   ├── books.mock.json
+│   │   ├── recommendations.seed.json
+│   │   └── sql/
+│   │       └── recommendations.schema.sql  # 推荐虚拟 SQL 表结构
 │   ├── pages/
 │   ├── services/
+│   │   ├── booksService.ts
+│   │   ├── recommendationsService.ts      # 模拟 INSERT/SELECT
+│   │   └── virtualDb/                     # 虚拟表列映射
 │   ├── types/
 │   ├── utils/                # 推荐表单校验等纯函数
 │   ├── index.css
