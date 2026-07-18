@@ -4,11 +4,13 @@ import { RadarCanvas } from "../components/radar/RadarCanvas";
 import { RadarFilters } from "../components/radar/RadarFilters";
 import { RadarLegend } from "../components/radar/RadarLegend";
 import { RadarTooltip } from "../components/radar/RadarTooltip";
+import { RecommendationDrawer } from "../components/recommendation/RecommendationDrawer";
+import { RecommendationRecordsModal } from "../components/recommendation/RecommendationRecordsModal";
 import { Button } from "../components/ui/Button";
-import { EmptyState } from "../components/ui/EmptyState";
 import { Skeleton } from "../components/ui/Skeleton";
+import { useBookRecommendation } from "../hooks/useBookRecommendation";
 import { getRadarBooks } from "../services/booksService";
-import type { BookItem, DifficultyLevel } from "../types/book";
+import type { BookItem, DifficultyLevel, RadarDomain } from "../types/book";
 import type { DomainMeta, RadarFilterState, RadarViewState, TooltipPosition } from "../types/radar";
 
 const domains: DomainMeta[] = [
@@ -22,6 +24,7 @@ const domains: DomainMeta[] = [
   { name: "前沿趋势", color: "#4D8DB7" },
 ];
 
+const domainNames: RadarDomain[] = domains.map((domain) => domain.name);
 const difficulties: DifficultyLevel[] = ["入门认知", "方法实践", "深度进阶"];
 
 const initialFilters: RadarFilterState = {
@@ -38,6 +41,7 @@ export function HomePage() {
   const [hoveredBookId, setHoveredBookId] = useState<string | null>(null);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition | null>(null);
+  const recommendation = useBookRecommendation();
 
   useEffect(() => {
     loadBooks();
@@ -115,7 +119,9 @@ export function HomePage() {
           </div>
         </div>
         <nav className="flex items-center gap-2.5" aria-label="首页入口">
-          <Button variant="primary">推荐一本书</Button>
+          <Button variant="primary" onClick={() => recommendation.openDrawer()}>
+            推荐一本书
+          </Button>
           <Button>查看完整书单</Button>
           <Button>评分说明</Button>
         </nav>
@@ -151,7 +157,9 @@ export function HomePage() {
             <div className="mb-2.5 flex items-center justify-between gap-4">
               <div>
                 <p className="m-0 text-[15px] font-extrabold">AI 学习路径雷达</p>
-                <p className="mt-1 text-[13px] text-muted">{resultMeta(effectiveViewState, filteredBooks.length, books.length)}</p>
+                <p className="mt-1 text-[13px] text-muted">
+                  {resultMeta(effectiveViewState, filteredBooks.length, books.length)}
+                </p>
               </div>
               <Button onClick={loadBooks}>刷新数据</Button>
             </div>
@@ -173,7 +181,9 @@ export function HomePage() {
                 <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#cfd7e2] bg-white/90">
                   <div className="max-w-[420px] text-center">
                     <h3 className="mb-2 text-lg font-extrabold">当前条件下暂无书籍</h3>
-                    <p className="mb-4 text-sm leading-6 text-muted">可以清空筛选，或降低推荐指数条件后继续探索。</p>
+                    <p className="mb-4 text-sm leading-6 text-muted">
+                      可以清空筛选，或降低推荐指数条件后继续探索。
+                    </p>
                     <Button variant="primary" onClick={clearFilters}>
                       清空筛选
                     </Button>
@@ -184,7 +194,9 @@ export function HomePage() {
                 <div className="absolute inset-x-6 bottom-7 top-[76px] z-10 grid place-items-center rounded-panel border border-dashed border-[#cfd7e2] bg-white/90">
                   <div className="max-w-[420px] text-center">
                     <h3 className="mb-2 text-lg font-extrabold">数据暂不可用</h3>
-                    <p className="mb-4 text-sm leading-6 text-muted">本地 mock service 暂时没有返回数据，请重试。</p>
+                    <p className="mb-4 text-sm leading-6 text-muted">
+                      本地 mock service 暂时没有返回数据，请重试。
+                    </p>
                     <Button variant="primary" onClick={loadBooks}>
                       重试
                     </Button>
@@ -206,10 +218,43 @@ export function HomePage() {
           primary
           title="推荐一本书"
           text="提交你认为具有长期价值的 AI 相关书籍，并说明它适合谁读。"
+          onAction={() => recommendation.openDrawer()}
         />
-        <EntryCard action="查看书单" title="查看完整书单" text="以列表方式查看全部书籍，可按领域、阶段和推荐指数继续筛选。" />
-        <EntryCard action="了解规则" title="评分说明" text="推荐指数强调专业判断和长期价值，不以短期热度作为核心依据。" />
+        <EntryCard
+          action="查看书单"
+          title="查看完整书单"
+          text="以列表方式查看全部书籍，可按领域、阶段和推荐指数继续筛选。"
+        />
+        <EntryCard
+          action="了解规则"
+          title="评分说明"
+          text="推荐指数强调专业判断和长期价值，不以短期热度作为核心依据。"
+        />
       </section>
+
+      <RecommendationDrawer
+        open={recommendation.isDrawerOpen}
+        draft={recommendation.draft}
+        domains={domainNames}
+        errors={recommendation.validationErrors}
+        submitError={recommendation.submitError}
+        submitting={recommendation.submitState === "submitting"}
+        canSubmit={recommendation.canSubmit}
+        onChange={recommendation.updateDraft}
+        onClear={recommendation.clearDraft}
+        onClose={recommendation.closeDrawer}
+        onSubmit={() => {
+          void recommendation.submitRecommendation();
+        }}
+      />
+
+      <RecommendationRecordsModal
+        open={recommendation.isRecordsModalOpen}
+        records={recommendation.records}
+        latestSubmittedId={recommendation.latestSubmittedId}
+        onClose={recommendation.closeRecordsModal}
+        onRecommendAgain={recommendation.recommendAgain}
+      />
     </main>
   );
 }
@@ -233,14 +278,17 @@ type EntryCardProps = {
   text: string;
   action: string;
   primary?: boolean;
+  onAction?: () => void;
 };
 
-function EntryCard({ title, text, action, primary = false }: EntryCardProps) {
+function EntryCard({ title, text, action, primary = false, onAction }: EntryCardProps) {
   return (
     <article className="rounded-panel border border-line bg-white p-4">
       <h3 className="mb-2 text-[15px] font-extrabold">{title}</h3>
       <p className="mb-3.5 text-[13px] leading-6 text-muted">{text}</p>
-      <Button variant={primary ? "primary" : "secondary"}>{action}</Button>
+      <Button variant={primary ? "primary" : "secondary"} onClick={onAction}>
+        {action}
+      </Button>
     </article>
   );
 }
