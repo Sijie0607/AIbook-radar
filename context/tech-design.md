@@ -24,12 +24,45 @@
 
 当前阶段只实现首页，不包含二级页面路由。
 
+### 2.1 唯一展示页面与推荐前端落点（已确认）
+
+当前产品只有一个可访问、可展示的页面：`index.html`（Vite 壳）→ `src/main.tsx` → `/` 路由 → `src/pages/HomePage.tsx`。
+
+| 文件 / 目录 | 角色 | 是否承载业务实现 |
+|---|---|---|
+| `index.html` | Vite 壳：挂载 `#root` 并加载 `src/main.tsx` | 否，仅入口 |
+| `archive/homepage-prototype.html` | 迁移前静态原型，已归档，不再作为可访问页面 | 否，不维护、不同步新功能 |
+| `src/pages/HomePage.tsx` | `/` 路由页面，雷达首页宿主 | 是，作为推荐入口接入点 |
+| `src/components/` + `src/services/` + `src/types/` | 推荐抽屉、表单、记录弹窗、service、类型 | 是，新增推荐相关模块 |
+
+启动链路：
+
+```text
+index.html → src/main.tsx → src/pages/HomePage.tsx → radar/ui 组件 + services
+```
+
+原型文件处理原则（已确认，避免与正式页面并存造成混淆）：
+
+- `homepage-prototype.html` 已移动到 `archive/homepage-prototype.html`，不再作为可直接打开测试的页面；
+- 归档说明见 `archive/README.md`；
+- 后续新功能（包括推荐能力）只在 `src/` 中实现，不回补进归档原型。
+
+推荐功能接入时：
+
+- 在 `HomePage` 接线顶部「推荐一本书」与底部「进入推荐」入口；
+- 推荐状态与雷达筛选 / Hover / 选中状态隔离；
+- 不把推荐表单或业务逻辑写进 `index.html`；
+- 不改正式雷达 `BookItem` 与 `books.mock.json`。
+
+产品与交互细则见 `context/features/book-recommendation.md`。
+
 ## 3. 目录分层约束
 
 | 目录 | 职责 |
 |---|---|
 | `src/pages/` | 页面级容器，负责数据加载、页面状态和业务组件组合 |
 | `src/components/radar/` | 雷达图首页相关业务组件 |
+| `src/components/recommendation/` | 书籍推荐抽屉、表单、记录弹窗等业务组件（规划落点） |
 | `src/components/ui/` | 通用基础 UI 组件 |
 | `src/services/` | mock service 与未来 API 抽象 |
 | `src/types/` | 业务实体、筛选器、视图状态等 TypeScript 类型 |
@@ -110,7 +143,7 @@ TypeScript 使用 `strict` 模式，禁止在业务代码中滥用 `any`。新�
 - `sectorIndex`、`ringIndex` 当前作为语义字段保留，尚未用于自动计算雷达位置。
 - “推荐一本书”“查看完整书单”“评分说明”当前只是首页入口按钮，不对应已实现路由。
 - 错误态依赖 `getRadarBooks()` 抛错，目前正常 mock service 不会主动触发错误。
-- `homepage-prototype.html` 是迁移前的静态 HTML 原型，React 实现以 `src/` 为准。
+- `archive/homepage-prototype.html` 是迁移前的静态 HTML 原型，已归档，React 实现以 `src/` 为准；书籍推荐等增量功能不得回写该原型文件，应在 `src/` 中实现，见第 2.1 节。
 
 ## 10. 验证命令
 

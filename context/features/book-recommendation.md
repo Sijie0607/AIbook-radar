@@ -421,6 +421,26 @@ AI-Native 读书雷达当前帮助 AI 学习者和转型从业者发现具有长
 
 ## 14. 数据、接口与实现约束
 
+### 14.0 前端落点（已确认）
+
+本轮书籍推荐的前端实现落点如下，后续编码以此为准：
+
+| 落点 | 说明 |
+|---|---|
+| 接入层 | `src/pages/HomePage.tsx`：接线顶部「推荐一本书」与底部「进入推荐」，管理推荐抽屉 / 记录弹窗状态 |
+| 业务组件 | `src/components/recommendation/`：`RecommendationDrawer`、`RecommendationForm`、`RecommendationRecordsModal`、`RecommendationRecordCard`、`ScoreInput` |
+| 数据访问 | `src/services/recommendationsService.ts`：记录与草稿读写，UI 不直接访问 `localStorage` |
+| 类型 | `src/types/` 下独立推荐模型，不复用正式雷达 `BookItem` |
+
+明确不落点：
+
+| 文件 | 原因 |
+|---|---|
+| `index.html` | 仅作 Vite 挂载壳（`#root` + `main.tsx`），不承载推荐业务 |
+| `archive/homepage-prototype.html` | 迁移前静态原型，已归档且不再是可访问页面，不作为本轮交付修改对象 |
+
+与工程基线的对应关系见 `context/tech-design.md` 第 2.1 节。
+
 ### 14.1 冲突与边界
 
 | 项目 | 已确认产品 / UX | 当前技术基线 | 判断 |
@@ -560,7 +580,7 @@ src/services/recommendationsService.ts
 
 ### 14.6 组件与现有系统的影响范围
 
-建议新增组件：
+建议新增组件（目录：`src/components/recommendation/`，落点见 14.0）：
 
 | 组件 | 职责 |
 |---|---|
